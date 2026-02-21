@@ -51,7 +51,7 @@ function seedIfEmpty() {
     saveData('edu_seeded', true);
     // Seed system users
     saveData('edu_sys_users', [
-      { id: 1, username: 'admin',  name: 'Alex Admin',  email: 'alex@school.edu',  role: 'admin',   status: 'Active',  lastLogin: new Date(Date.now()-3600000).toISOString(),  permissions: { dashboard:true, sections:true, timetable:true, rooms:true, teachers:true, students:true, users:true, conflicts:true }, createdAt: '2024-06-01T00:00:00Z' },
+      { id: 1, username: 'admin',  name: 'Admin',  email: 'alex@school.edu',  role: 'admin',   status: 'Active',  lastLogin: new Date(Date.now()-3600000).toISOString(),  permissions: { dashboard:true, sections:true, timetable:true, rooms:true, teachers:true, students:true, users:true, conflicts:true }, createdAt: '2024-06-01T00:00:00Z' },
       { id: 2, username: 'staff',  name: 'Sam Staff',   email: 'sam@school.edu',   role: 'staff',   status: 'Active',  lastLogin: new Date(Date.now()-86400000).toISOString(), permissions: { dashboard:true, sections:true, timetable:true, rooms:true, teachers:false, students:true, users:false, conflicts:false }, createdAt: '2024-06-05T00:00:00Z' },
       { id: 3, username: 'student', name: 'Stacy Student', email: 'stacy@school.edu', role: 'student', status: 'Active', lastLogin: new Date(Date.now()-7200000).toISOString(),  permissions: { dashboard:true, sections:false, timetable:false, rooms:false, teachers:false, students:false, users:false, conflicts:false }, createdAt: '2024-08-01T00:00:00Z' },
     ]);
@@ -756,8 +756,8 @@ function renderTimetable(el) {
             </div>
           </td>`;
         }
-        return `<td>${isAdmin ? `<div class="cell-add" onclick="addScheduleSlot(${sectId},'${day}','${time}')">+</div>` : '<div style="color:#e2e8f0;text-align:center;font-size:.75rem;padding:4px">—</div>'}</td>`;
-      }).join('');
+        return `<td>${isAdmin ? `<div class="cell-add" onclick="addScheduleSlot(${sectId},'${day},'${time}')">+</div>` : '<div style="color:#e2e8f0;text-align:center;font-size:.75rem;padding:4px">—</div>'}</td>`;
+      });
     });
     return TIME_SLOTS.map((t, ti) => `<tr><td class="time-col">${t}–${TIME_SLOTS[ti+1]||'18:00'}</td>${cells.map(dc=>dc[ti]).join('')}</tr>`).join('');
   }
