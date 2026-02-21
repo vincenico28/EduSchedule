@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EduSchedule — Class Management System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ===== AUTH SCREEN ===== -->
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo">🎓 EduSchedule</div>
+    <div class="auth-tagline">Class Scheduling & Section Management System</div>
+    <h2>Sign In</h2>
+    <div class="form-group">
+      <label>Select Your Role</label>
+      <div class="role-grid">
+        <div class="role-btn active" data-role="admin" onclick="selectRole('admin', this)">
+          <div class="role-icon">🛡️</div>
+          <div class="role-name">Admin</div>
+        </div>
+        <div class="role-btn" data-role="staff" onclick="selectRole('staff', this)">
+          <div class="role-icon">👩‍💼</div>
+          <div class="role-name">Staff</div>
+        </div>
+        <div class="role-btn" data-role="student" onclick="selectRole('student', this)">
+          <div class="role-icon">🎓</div>
+          <div class="role-name">Student</div>
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Username</label>
+      <input type="text" id="login-user" placeholder="Enter your username" >
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="login-pass" placeholder="••••••••" >
+    </div>
+    <button class="btn-primary" onclick="doLogin()">Sign In →</button>
+    <p class="demo-hint" style="margin-top:14px">
+      New student? <button class="auth-link" onclick="goToRegister()">Create an account →</button>
+    </p>
+    
+  </div>
+</div>
+
+<!-- ===== REGISTER SCREEN ===== -->
+<div id="register-screen">
+  <div class="reg-card">
+    <div class="auth-logo">🎓 EduSchedule</div>
+    <div class="auth-tagline" style="margin-bottom:22px">Student Registration</div>
+
+    <!-- Step indicator -->
+    <div class="reg-steps">
+      <div class="reg-step active" id="step-ind-1">
+        <div class="reg-step-num">1</div>
+        <div class="reg-step-label">Account</div>
+      </div>
+      <div class="reg-step-line" id="line-1"></div>
+      <div class="reg-step" id="step-ind-2">
+        <div class="reg-step-num">2</div>
+        <div class="reg-step-label">Profile</div>
+      </div>
+      <div class="reg-step-line" id="line-2"></div>
+      <div class="reg-step" id="step-ind-3">
+        <div class="reg-step-num">3</div>
+        <div class="reg-step-label">Sections</div>
+      </div>
+      <div class="reg-step-line" id="line-3"></div>
+      <div class="reg-step" id="step-ind-4">
+        <div class="reg-step-num">4</div>
+        <div class="reg-step-label">Done</div>
+      </div>
+    </div>
+
+    <!-- Step 1: Account -->
+    <div class="reg-panel active" id="reg-step-1">
+      <h2 style="font-size:1.2rem;margin-bottom:18px">Create Your Account</h2>
+      <div class="form-group">
+        <label>Student ID / Username</label>
+        <input type="text" id="r-username" placeholder="e.g. 2024-00123">
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="r-password" placeholder="Min. 6 characters">
+        </div>
+        <div class="form-group">
+          <label>Confirm Password</label>
+          <input type="password" id="r-password2" placeholder="Re-enter password">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="r-email" placeholder="yourname@school.edu">
+      </div>
+      <button class="btn-primary" onclick="regStep1()">Continue →</button>
+      <p class="demo-hint" style="margin-top:14px">Already have an account? <button class="auth-link" onclick="goToLogin()">Sign in</button></p>
+    </div>
+
+    <!-- Step 2: Profile -->
+    <div class="reg-panel" id="reg-step-2">
+      <h2 style="font-size:1.2rem;margin-bottom:18px">Personal Information</h2>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>First Name</label>
+          <input type="text" id="r-firstname" placeholder="Juan">
+        </div>
+        <div class="form-group">
+          <label>Last Name</label>
+          <input type="text" id="r-lastname" placeholder="Dela Cruz">
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Year Level</label>
+          <select id="r-year">
+            <option>1st Year</option><option>2nd Year</option><option>3rd Year</option><option>4th Year</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Program / Course</label>
+          <select id="r-course">
+            <option>BSIT</option><option>BSCS</option><option>BSCE</option><option>BSEd</option><option>BSBA</option><option>BSEE</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Student Type</label>
+          <select id="r-type">
+            <option>Regular</option><option>Irregular</option><option>Transferee</option><option>Returnee</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Contact Number</label>
+          <input type="text" id="r-contact" placeholder="09XX-XXX-XXXX">
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:6px">
+        <button class="btn btn-ghost" style="flex:1" onclick="regGoStep(1)">← Back</button>
+        <button class="btn btn-indigo" style="flex:2" onclick="regStep2()">Continue →</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Section Enrollment -->
+    <div class="reg-panel" id="reg-step-3">
+      <h2 style="font-size:1.2rem;margin-bottom:4px">Enroll in Sections</h2>
+      <p style="font-size:.82rem;color:var(--text-muted);margin-bottom:14px">Select the sections you want to enroll in this term</p>
+      <div class="form-group">
+        <label>Search Sections</label>
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="r-sect-search" placeholder="Filter by name or subject..." oninput="filterRegSections()">
+        </div>
+      </div>
+      <div class="section-picker" id="reg-section-picker"></div>
+      <div id="reg-selected-list" class="selected-sections-list" style="margin-top:12px"></div>
+      <p style="font-size:.75rem;color:var(--text-muted);margin-top:8px" id="reg-sel-count">0 sections selected</p>
+      <div style="display:flex;gap:10px;margin-top:16px">
+        <button class="btn btn-ghost" style="flex:1" onclick="regGoStep(2)">← Back</button>
+        <button class="btn btn-indigo" style="flex:2" onclick="regStep3()">Finish Registration →</button>
+      </div>
+    </div>
+
+    <!-- Step 4: Success -->
+    <div class="reg-panel" id="reg-step-4">
+      <div class="reg-success">
+        <div class="reg-success-icon">🎉</div>
+        <h2 style="font-family:'Syne',sans-serif;font-size:1.4rem;margin-bottom:8px">Registration Complete!</h2>
+        <p style="color:var(--text-muted);font-size:.9rem;margin-bottom:6px">Welcome to EduSchedule, <strong id="reg-done-name"></strong>!</p>
+        <p style="color:var(--text-muted);font-size:.82rem;margin-bottom:24px">Your account has been created. You can now sign in with your credentials.</p>
+        <div id="reg-done-summary" style="background:var(--surface2);border-radius:10px;padding:14px;text-align:left;margin-bottom:20px;font-size:.83rem"></div>
+        <button class="btn-primary" onclick="goToLogin()">Sign In Now →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== APP SHELL ===== -->
+<div id="app">
+  <!-- Sidebar overlay -->
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+  
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <span>EduSchedule</span>
+    </div>
+    <div class="sidebar-user">
+      <div class="user-avatar" id="sb-avatar">A</div>
+      <div class="user-info">
+        <div class="user-name" id="sb-username">Administrator</div>
+        <div class="user-role" id="sb-role">admin</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav" id="sidebar-nav">
+      <!-- Nav items injected by JS -->
+    </nav>
+    <div class="sidebar-footer">
+      <button class="btn-logout" onclick="doLogout()">⬅ Sign Out</button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main-content">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+        <div class="page-title" id="page-title">Dashboard</div>
+      </div>
+      <div class="topbar-right">
+        <div class="notif-btn" onclick="showView('conflicts')">
+          🔔
+          <div class="notif-dot" id="notif-dot" style="display:none"></div>
+        </div>
+        <div class="profile-chip">
+          <div class="profile-chip-avatar" id="tb-avatar">A</div>
+          <div class="profile-chip-name" id="tb-name">Admin</div>
+        </div>
+      </div>
+    </header>
+
+    <div class="content-area">
+      <!-- VIEWS -->
+      <div class="view active" id="view-dashboard"></div>
+      <div class="view" id="view-sections"></div>
+      <div class="view" id="view-timetable"></div>
+      <div class="view" id="view-rooms"></div>
+      <div class="view" id="view-teachers"></div>
+      <div class="view" id="view-conflicts"></div>
+      <div class="view" id="view-students"></div>
+      <div class="view" id="view-users"></div>
+      <div class="view" id="view-my-schedule"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- Modals -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal" id="modal-box">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title">Modal</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<script src="Script.js"></script>
+</body>
+</html>
