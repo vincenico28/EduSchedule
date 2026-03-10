@@ -45,7 +45,6 @@
     <p class="demo-hint" style="margin-top:14px">
       New student? <button class="auth-link" onclick="goToRegister()">Create an account →</button>
     </p>
-    
   </div>
 </div>
 
@@ -54,8 +53,6 @@
   <div class="reg-card">
     <div class="auth-logo">🎓 EduSchedule</div>
     <div class="auth-tagline" style="margin-bottom:22px">Student Registration</div>
-
-    <!-- Step indicator -->
     <div class="reg-steps">
       <div class="reg-step active" id="step-ind-1">
         <div class="reg-step-num">1</div>
@@ -77,8 +74,6 @@
         <div class="reg-step-label">Done</div>
       </div>
     </div>
-
-    <!-- Step 1: Account -->
     <div class="reg-panel active" id="reg-step-1">
       <h2 style="font-size:1.2rem;margin-bottom:18px">Create Your Account</h2>
       <div class="form-group">
@@ -102,8 +97,6 @@
       <button class="btn-primary" onclick="regStep1()">Continue →</button>
       <p class="demo-hint" style="margin-top:14px">Already have an account? <button class="auth-link" onclick="goToLogin()">Sign in</button></p>
     </div>
-
-    <!-- Step 2: Profile -->
     <div class="reg-panel" id="reg-step-2">
       <h2 style="font-size:1.2rem;margin-bottom:18px">Personal Information</h2>
       <div class="form-grid">
@@ -147,8 +140,6 @@
         <button class="btn btn-indigo" style="flex:2" onclick="regStep2()">Continue →</button>
       </div>
     </div>
-
-    <!-- Step 3: Section Enrollment -->
     <div class="reg-panel" id="reg-step-3">
       <h2 style="font-size:1.2rem;margin-bottom:4px">Enroll in Sections</h2>
       <p style="font-size:.82rem;color:var(--text-muted);margin-bottom:14px">Select the sections you want to enroll in this term</p>
@@ -167,8 +158,6 @@
         <button class="btn btn-indigo" style="flex:2" onclick="regStep3()">Finish Registration →</button>
       </div>
     </div>
-
-    <!-- Step 4: Success -->
     <div class="reg-panel" id="reg-step-4">
       <div class="reg-success">
         <div class="reg-success-icon">🎉</div>
@@ -184,10 +173,7 @@
 
 <!-- ===== APP SHELL ===== -->
 <div id="app">
-  <!-- Sidebar overlay -->
   <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
-  
-  <!-- Sidebar -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
       <span>EduSchedule</span>
@@ -199,15 +185,11 @@
         <div class="user-role" id="sb-role">admin</div>
       </div>
     </div>
-    <nav class="sidebar-nav" id="sidebar-nav">
-      <!-- Nav items injected by JS -->
-    </nav>
+    <nav class="sidebar-nav" id="sidebar-nav"></nav>
     <div class="sidebar-footer">
       <button class="btn-logout" onclick="doLogout()">⬅ Sign Out</button>
     </div>
   </aside>
-
-  <!-- Main -->
   <div class="main-content">
     <header class="topbar">
       <div class="topbar-left">
@@ -225,9 +207,7 @@
         </div>
       </div>
     </header>
-
     <div class="content-area">
-      <!-- VIEWS -->
       <div class="view active" id="view-dashboard"></div>
       <div class="view" id="view-sections"></div>
       <div class="view" id="view-timetable"></div>
@@ -241,10 +221,8 @@
   </div>
 </div>
 
-<!-- Toast container -->
 <div class="toast-container" id="toast-container"></div>
 
-<!-- Modals -->
 <div class="modal-overlay" id="modal-overlay">
   <div class="modal" id="modal-box">
     <div class="modal-header">

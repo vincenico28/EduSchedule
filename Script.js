@@ -1,13 +1,10 @@
-
 // ============================================================
 //  DATA STORE
 const DEMO_USERS = {
   admin:   { password: 'admin123', role: 'admin',   name: 'Admin' },
   staff:   { password: 'staff123', role: 'staff',   name: 'Staff' },
-  
 };
 // ============================================================
-
 
 function loadData(key, def) {
   try { return JSON.parse(localStorage.getItem(key)) || def; } catch { return def; }
@@ -49,7 +46,6 @@ function seedIfEmpty() {
       { id: 6, sectionId: 1, day: 'Wednesday', timeStart: '09:00', timeEnd: '10:30', roomId: 1, teacherId: 1 },
     ]);
     saveData('edu_seeded', true);
-    // Seed system users
     saveData('edu_sys_users', [
       { id: 1, username: 'admin',  name: 'Admin',  email: 'alex@school.edu',  role: 'admin',   status: 'Active',  lastLogin: new Date(Date.now()-3600000).toISOString(),  permissions: { dashboard:true, sections:true, timetable:true, rooms:true, teachers:true, students:true, users:true, conflicts:true }, createdAt: '2024-06-01T00:00:00Z' },
       { id: 2, username: 'staff',  name: 'Sam Staff',   email: 'sam@school.edu',   role: 'staff',   status: 'Active',  lastLogin: new Date(Date.now()-86400000).toISOString(), permissions: { dashboard:true, sections:true, timetable:true, rooms:true, teachers:false, students:true, users:false, conflicts:false }, createdAt: '2024-06-05T00:00:00Z' },
@@ -90,7 +86,6 @@ const DB = {
 let currentUser = null;
 let selectedRole = 'admin';
 
-// Registration state
 const regData = { username:'', password:'', email:'', firstName:'', lastName:'', yearLevel:'', course:'', type:'', contact:'', sections:[] };
 
 function goToRegister() {
@@ -104,7 +99,6 @@ function goToRegister() {
 function goToLogin() {
   document.getElementById('register-screen').style.display = 'none';
   document.getElementById('auth-screen').style.display = 'flex';
-  // Pre-select student role when coming from register
   const studentBtn = document.querySelector('[data-role="student"]');
   if (studentBtn) selectRole('student', studentBtn);
 }
@@ -132,7 +126,6 @@ function regStep1() {
   if (pass.length < 6) { showToast('Password must be at least 6 characters', 'warning'); return; }
   if (pass !== pass2) { showToast('Passwords do not match', 'danger'); return; }
   if (!email) { showToast('Please enter your email address', 'warning'); return; }
-  // Check if username already taken
   const existing = DB.students.find(s => s.username === username);
   if (existing || DEMO_USERS[username]) { showToast('Username already taken. Please choose another.', 'danger'); return; }
   regData.username = username;
@@ -174,7 +167,7 @@ function renderRegSections(filter='') {
         <span class="badge ${catColor[s.category]||'badge-gray'}">${s.category}</span>
         <span class="badge badge-gray" style="margin-left:4px">${s.yearLevel}</span>
       </div>
-    </div>`) .join('') :
+    </div>`).join('') :
     '<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--text-muted);font-size:.85rem">No sections found</div>';
   updateRegSelectedList();
 }
@@ -187,7 +180,6 @@ function toggleRegSection(id, el) {
   const idx = regData.sections.indexOf(id);
   if (idx >= 0) regData.sections.splice(idx, 1);
   else regData.sections.push(id);
-  // Update all cards
   document.querySelectorAll('.section-pick-card').forEach(card => {
     card.classList.remove('selected');
   });
@@ -215,7 +207,6 @@ function updateRegSelectedList() {
 }
 
 function regStep3() {
-  // Save student
   const students = DB.students;
   const newId = Date.now();
   const newStudent = {
@@ -237,7 +228,6 @@ function regStep3() {
   students.push(newStudent);
   DB.students = students;
 
-  // Show success
   document.getElementById('reg-done-name').textContent = regData.firstName;
   const sects = DB.sections;
   const enrolledNames = regData.sections.map(id => sects.find(s=>s.id===id)?.name || '').filter(Boolean);
@@ -258,15 +248,29 @@ function selectRole(role, el) {
   el.classList.add('active');
 }
 
+// ============================================================
+// ✅ FIX 1: Block suspended students from logging in
+// ============================================================
 function doLogin() {
   const user = document.getElementById('login-user').value.trim();
   const pass = document.getElementById('login-pass').value.trim();
 
-  // Check registered students first
   if (selectedRole === 'student') {
     const student = DB.students.find(s => s.username === user && s.password === pass);
     if (student) {
-      currentUser = { username: student.username, name: student.name, role: 'student', studentId: student.id, enrolledSections: student.enrolledSections || [] };
+      // CHECK: Block suspended students at login
+      if (student.status === 'Suspended') {
+        showToast('Your account has been suspended. Please contact your administrator.', 'danger');
+        return;
+      }
+      currentUser = {
+        username: student.username,
+        name: student.name,
+        role: 'student',
+        studentId: student.id,
+        enrolledSections: student.enrolledSections || [],
+        status: student.status
+      };
       document.getElementById('auth-screen').style.display = 'none';
       document.getElementById('app').classList.add('active');
       initApp();
@@ -275,7 +279,6 @@ function doLogin() {
     }
   }
 
-  // Check demo/hardcoded users
   const u = DEMO_USERS[user];
   if (!u || u.password !== pass || u.role !== selectedRole) {
     showToast('Invalid credentials or role mismatch', 'danger');
@@ -305,7 +308,7 @@ function logActivity(action, detail, type='data') {
     action, detail, type,
     ts: new Date().toISOString()
   });
-  DB.activityLog = log.slice(0, 200); // keep last 200
+  DB.activityLog = log.slice(0, 200);
 }
 
 // ============================================================
@@ -354,7 +357,6 @@ function initApp() {
   seedIfEmpty();
   const role = currentUser.role;
   
-  // Set user info
   const initials = currentUser.name.split(' ').map(n=>n[0]).join('').slice(0,2);
   document.getElementById('sb-avatar').textContent = initials;
   document.getElementById('sb-username').textContent = currentUser.name;
@@ -362,7 +364,6 @@ function initApp() {
   document.getElementById('tb-avatar').textContent = initials;
   document.getElementById('tb-name').textContent = currentUser.name.split(' ')[0];
 
-  // Build sidebar nav
   const nav = document.getElementById('sidebar-nav');
   nav.innerHTML = '';
   const config = NAV_CONFIG[role] || [];
@@ -378,7 +379,6 @@ function initApp() {
     });
   });
 
-  // Show notification dot if conflicts exist
   const conflicts = detectConflicts();
   if (conflicts.length > 0) document.getElementById('notif-dot').style.display = 'block';
 
@@ -415,7 +415,6 @@ function showView(viewId) {
   };
   if (renderers[viewId]) renderers[viewId](viewEl);
 
-  // Close sidebar on mobile
   if (window.innerWidth <= 768) {
     document.getElementById('sidebar').classList.remove('open');
     document.getElementById('sidebar-overlay').classList.remove('active');
@@ -762,11 +761,6 @@ function renderTimetable(el) {
     return TIME_SLOTS.map((t, ti) => `<tr><td class="time-col">${t}–${TIME_SLOTS[ti+1]||'18:00'}</td>${cells.map(dc=>dc[ti]).join('')}</tr>`).join('');
   }
 
-  function refreshTable() {
-    const tbody = document.getElementById('tt-body');
-    if (tbody) tbody.innerHTML = buildTable(currentSect);
-  }
-
   el.innerHTML = `
     <div class="page-header">
       <div class="page-header-left">
@@ -859,7 +853,6 @@ function saveSchedule() {
   const ti = TIME_SLOTS.indexOf(timeStart);
   const timeEnd = TIME_SLOTS[ti+1] || '18:00';
 
-  // Check conflicts
   const scheds = DB.schedules;
   const conflicts = [];
   scheds.forEach(s => {
@@ -1197,7 +1190,6 @@ function detectConflicts() {
       }
     }
   }
-  // Overload
   DB.teachers.forEach(t => {
     if (t.units > t.maxUnits) conflicts.push({ type:'overload', desc: `${t.name} is overloaded by ${t.units - t.maxUnits} units` });
   });
@@ -1279,7 +1271,6 @@ function renderUserManagement(el) {
   const students = DB.students;
   const log = DB.activityLog;
 
-  // Merge: sysUsers = admins + staff, students = registered students
   const allUsers = [
     ...sysUsers,
     ...students.map(s => ({
@@ -1308,8 +1299,6 @@ function renderUserManagement(el) {
         <button class="btn btn-indigo" onclick="addSystemUser()">+ Add User</button>
       </div>
     </div>
-
-    <!-- Stats -->
     <div class="um-stats">
       <div class="stat-mini">
         <div class="stat-mini-icon">👥</div>
@@ -1328,8 +1317,6 @@ function renderUserManagement(el) {
         <div><div class="stat-mini-val">${studs.length}</div><div class="stat-mini-label">Students</div></div>
       </div>
     </div>
-
-    <!-- Tabs -->
     <div class="um-tabs">
       <button class="um-tab ${umActiveTab==='all'?'active':''}" onclick="umSwitchTab('all')">All Users <span class="um-count">${allUsers.length}</span></button>
       <button class="um-tab ${umActiveTab==='admin'?'active':''}" onclick="umSwitchTab('admin')">Admins <span class="um-count">${admins.length}</span></button>
@@ -1337,8 +1324,6 @@ function renderUserManagement(el) {
       <button class="um-tab ${umActiveTab==='student'?'active':''}" onclick="umSwitchTab('student')">Students <span class="um-count">${studs.length}</span></button>
       <button class="um-tab ${umActiveTab==='log'?'active':''}" onclick="umSwitchTab('log')">Activity Log <span class="um-count">${log.length}</span></button>
     </div>
-
-    <!-- All / Admin / Staff / Student panels -->
     ${['all','admin','staff','student'].map(tab => `
     <div class="um-panel ${umActiveTab===tab?'active':''}" id="um-panel-${tab}">
       <div class="search-filter-bar">
@@ -1354,8 +1339,6 @@ function renderUserManagement(el) {
         ${buildUserTable(tab==='all' ? allUsers : allUsers.filter(u=>u.role===tab))}
       </div>
     </div>`).join('')}
-
-    <!-- Activity Log panel -->
     <div class="um-panel ${umActiveTab==='log'?'active':''}" id="um-panel-log">
       <div class="search-filter-bar">
         <div class="search-wrap">
@@ -1378,7 +1361,6 @@ function renderUserManagement(el) {
       </div>
     </div>`;
 
-  // Expose filter functions to window
   window.umFilter = (tab, val) => {
     const statusEl = document.getElementById('um-status-' + tab);
     const status = statusEl ? statusEl.value : 'All';
@@ -1430,9 +1412,7 @@ function buildUserTable(users) {
       const statusBadge = u.status === 'Active'
         ? '<span class="badge badge-success">Active</span>'
         : '<span class="badge badge-danger">Suspended</span>';
-      const lastLogin = u.lastLogin
-        ? timeAgo(u.lastLogin)
-        : '<span style="color:var(--text-light)">Never</span>';
+      const lastLogin = u.lastLogin ? timeAgo(u.lastLogin) : '<span style="color:var(--text-light)">Never</span>';
       const roleBadge = `<span class="badge ${roleColors[u.role]||'badge-gray'}" style="text-transform:capitalize">${u.role}</span>`;
 
       return `<div class="user-row" style="grid-template-columns:38px 1fr 120px 100px 130px 150px">
@@ -1722,7 +1702,6 @@ function managePermissions(username, role) {
       item.style.background = el.checked ? '#f0fdf4' : '';
     }
   };
-  // sync initial state
   ALL_PERMISSIONS.forEach(p => syncPermItem(p.key));
 }
 
@@ -1841,8 +1820,10 @@ function renderStudents(el) {
       const typeColor = {Regular:'badge-success', Irregular:'badge-warning', Transferee:'badge-cyan', Returnee:'badge-indigo'};
       const statusColor = s.status === 'Active' ? 'badge-success' : 'badge-danger';
       return `
-        <div class="student-profile-card">
-          <div class="student-ava">${initials}</div>
+        <div class="student-profile-card" style="border-left-color:${s.status==='Suspended'?'var(--danger)':'var(--primary)'}">
+          <div class="student-ava" style="${s.status==='Suspended'?'background:linear-gradient(135deg,#fef2f2,#fecaca);color:var(--danger)':''}">
+            ${s.status==='Suspended' ? '🚫' : initials}
+          </div>
           <div class="student-info" style="flex:1">
             <div class="student-name">${s.name}</div>
             <div class="student-meta">
@@ -1883,8 +1864,6 @@ function renderStudents(el) {
         <button class="btn btn-ghost" onclick="exportStudents()">⬇ Export</button>
       </div>
     </div>
-
-    <!-- Summary stats -->
     <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px">
       <div class="stat-card indigo">
         <div class="stat-icon">🎓</div>
@@ -1907,7 +1886,6 @@ function renderStudents(el) {
         <div class="stat-label">With Sections</div>
       </div>
     </div>
-
     <div class="toolbar">
       <div class="search-wrap" style="flex:1">
         <span class="search-icon">🔍</span>
@@ -1920,7 +1898,6 @@ function renderStudents(el) {
         <option>All</option><option>Active</option><option>Suspended</option>
       </select>
     </div>
-
     <div id="students-grid" style="display:flex;flex-direction:column;gap:12px"></div>`;
 
   window.stuRefresh = () => {
@@ -1992,8 +1969,7 @@ function saveAdminStudent(id=null) {
   if (id) {
     const i = students.findIndex(s=>s.id===id);
     if (i>=0) students[i] = {...students[i],
-      name: first+' '+last,
-      firstName: first, lastName: last,
+      name: first+' '+last, firstName: first, lastName: last,
       email: document.getElementById('as-email').value,
       contact: document.getElementById('as-contact').value,
       yearLevel: document.getElementById('as-year').value,
@@ -2126,36 +2102,85 @@ function exportStudents() {
 }
 
 // ============================================================
-//  MY SCHEDULE (Student)
+// ✅ FIX 2: renderMySchedule — show suspension banner & block schedule
 // ============================================================
 function renderMySchedule(el) {
-  // Get enrolled section IDs for the logged-in student
   const enrolledIds = currentUser.enrolledSections || [];
   const allScheds = DB.schedules;
   const sects = DB.sections;
 
-  // Filter schedules to only enrolled sections
   const scheds = enrolledIds.length > 0
     ? allScheds.filter(s => enrolledIds.includes(s.sectionId))
-    : allScheds; // fallback: demo student sees all
+    : allScheds;
 
   const enrolledSects = enrolledIds.length > 0
     ? sects.filter(s => enrolledIds.includes(s.id))
     : sects;
 
-  // Find the registered student profile
+  // Find registered student profile & check suspension
   const studentProfile = DB.students.find(s => s.username === currentUser.username);
+  const isSuspended = studentProfile && studentProfile.status === 'Suspended';
 
   el.innerHTML = `
     <div class="page-header">
       <div class="page-header-left">
         <h1>My Class Schedule</h1>
-        <p>${enrolledIds.length > 0 ? `${enrolledSects.length} enrolled section${enrolledSects.length!==1?'s':''} this term` : 'All schedules (demo view)'}</p>
+        <p>${isSuspended ? 'Account suspended' : enrolledIds.length > 0 ? `${enrolledSects.length} enrolled section${enrolledSects.length!==1?'s':''} this term` : 'All schedules (demo view)'}</p>
       </div>
     </div>
 
+    ${isSuspended ? `
+    <!-- ===== SUSPENSION BANNER ===== -->
+    <div class="card" style="margin-bottom:20px;border:2px solid var(--danger);background:linear-gradient(135deg,#fef2f2,#fff5f5);box-shadow:0 4px 20px rgba(239,68,68,.15)">
+      <div class="card-body" style="padding:24px;display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+        <div style="width:58px;height:58px;border-radius:16px;background:#fecaca;display:flex;align-items:center;justify-content:center;font-size:1.9rem;flex-shrink:0;box-shadow:0 4px 12px rgba(239,68,68,.2)">🚫</div>
+        <div style="flex:1;min-width:200px">
+          <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.05rem;color:var(--danger);margin-bottom:5px">Account Suspended</div>
+          <div style="font-size:.87rem;color:#b91c1c;line-height:1.6">Your account has been suspended by an administrator. Schedule access is restricted until your account is reactivated. Please contact your school administrator for assistance.</div>
+        </div>
+        <div style="background:#fecaca;border-radius:10px;padding:10px 16px;text-align:center;flex-shrink:0">
+          <div style="font-size:.7rem;color:#991b1b;font-weight:700;text-transform:uppercase;letter-spacing:.05em">Status</div>
+          <div style="font-size:.9rem;color:var(--danger);font-weight:800;margin-top:2px">Suspended</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== BLURRED / LOCKED SCHEDULE ===== -->
+    <div style="position:relative;border-radius:var(--radius);overflow:hidden">
+      <!-- Lock overlay -->
+      <div style="position:absolute;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,255,255,.6);backdrop-filter:blur(2px)">
+        <div style="background:var(--surface);border:2px solid var(--danger);border-radius:18px;padding:32px 44px;text-align:center;box-shadow:0 12px 40px rgba(239,68,68,.2);max-width:320px">
+          <div style="font-size:2.8rem;margin-bottom:12px">🔒</div>
+          <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;color:var(--danger);margin-bottom:6px">Schedule Access Blocked</div>
+          <div style="font-size:.78rem;color:var(--text-muted);line-height:1.5">Your schedule is hidden while your account is suspended. Contact your administrator to restore access.</div>
+        </div>
+      </div>
+      <!-- Blurred timetable underneath -->
+      <div style="filter:blur(5px);pointer-events:none;user-select:none;opacity:.3">
+        <div class="card">
+          <div class="card-body" style="padding:16px">
+            <div class="timetable-grid">
+              <table class="timetable">
+                <thead>
+                  <tr>
+                    <th>Time</th>
+                    ${DAYS.map(d=>`<th>${d}</th>`).join('')}
+                  </tr>
+                </thead>
+                <tbody>
+                  ${TIME_SLOTS.map(t => `<tr>
+                    <td class="time-col">${t}</td>
+                    ${DAYS.map(() => `<td><div style="height:60px;background:#eef2ff;border-radius:6px;margin:2px"></div></td>`).join('')}
+                  </tr>`).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>` : `
+
     ${studentProfile ? `
-    <!-- Student Profile Card -->
     <div class="card" style="margin-bottom:20px">
       <div class="card-body" style="padding:20px">
         <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
@@ -2232,7 +2257,7 @@ function renderMySchedule(el) {
           </table>
         </div>
       </div>
-    </div>`;
+    </div>`}`;
 }
 
 // ============================================================
